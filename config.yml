@@ -1,0 +1,16 @@
+# URL of the Comand installation.
+remoteVersionURL: http://localhost:8080/comand-index.html
+
+# URL of the overview site.
+currentVersionURL: http://localhost:8080/overview-index.html
+
+# Absolute path to the index.html of the overview site.
+indexHTMLFile: ./test/overview-index.html
+
+# String to search for the right version. Changing the default is in most
+# cases not necessary.
+searchString: Release
+
+# Search for the current version in the URL or directly in the given index
+# HTML file. False is recommended.
+useLocal: false
