@@ -5,11 +5,14 @@ ARG https_proxy
 ENV http_proxy=${http_proxy}
 ENV https_proxy=${https_proxy}
 
+RUN git clone https://github.com/dmittelstaedt/dupover.git /go/src/app
+
 WORKDIR /go/src/app
 
-COPY dupover.go .
-
 RUN go get ./...
-RUN go build dupover.go
+RUN VERSION=$(git tag --list | tail -1 | cut -c 2-) && \
+GIT_COMMIT=$(git rev-parse --short HEAD) && \
+BUILD_DATE=$(date +"%Y-%m-%d %T") && \
+go build -ldflags "-X main.versionNumber=$VERSION -X main.gitCommit=$GIT_COMMIT -X 'main.buildDate=$BUILD_DATE'" -o dupover main.go
 
 ENTRYPOINT [ "/bin/bash" ]

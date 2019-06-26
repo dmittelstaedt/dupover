@@ -3,6 +3,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,23 +17,32 @@ import (
 	"github.com/gocolly/colly"
 )
 
-// Constants for the configuration file name, search string in the overview
-// site and search string for the comand site
-const (
-	configurationFileName = "config"
-	overviewSearchElement = "p[class=\"small text-center\"]"
-	comandSearchElement   = "span[class=\"releaseInformation\"]"
-)
-
-var execDir string
-
-// Struct to represent the configuration
+// configuration represents the configuration
 type configuration struct {
 	RemoteVersionURL  string
 	CurrentVersionURL string
 	IndexHTMLFile     string
 	SearchString      string
 	UseLocal          bool
+}
+
+// Constants for the configuration file name, search string in the overview
+// site and search string for the comand site
+const (
+	configurationFileName = "config"
+	overviewSearchElement = "p[class=\"small text-center\"]"
+	comandSearchElement   = "span[class=\"releaseInformation\"]"
+	v                     = "v"
+)
+
+var version *bool
+var versionNumber string
+var gitCommit string
+var buildDate string
+var execDir string
+
+func init() {
+	version = flag.Bool(v, false, "Version")
 }
 
 // setExecDir sets the directory where the executable is located
@@ -159,13 +170,22 @@ func updateCurrentVersion(fileName, oldVersion, newVersion string) {
 }
 
 func main() {
-	var remoteVersion string
-	var currentVersion string
-	c := make(chan string, 2)
+	flag.Parse()
 
 	setExecDir()
 
+	if *version {
+		fmt.Println("Version: " + versionNumber)
+		fmt.Println("Git Commit: " + gitCommit)
+		fmt.Println("Build Date: " + buildDate)
+		os.Exit(0)
+	}
+
 	configuration := readConfig(configurationFileName)
+
+	var remoteVersion string
+	var currentVersion string
+	c := make(chan string, 2)
 	if configuration.UseLocal == true {
 		go getVersionFromFileWithChan(configuration.IndexHTMLFile, overviewSearchElement, &currentVersion, c)
 	} else {
