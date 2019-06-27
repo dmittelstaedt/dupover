@@ -5,7 +5,7 @@ remoteVersionURL: http://localhost:8080/comand-index.html
 currentVersionURL: http://localhost:8080/overview-index.html
 
 # Absolute path to the index.html of the overview site.
-indexHTMLFile: ./test/overview-index.html
+indexHTMLFile: /home/david/go/src/github.com/dmittelstaedt/dupover/test/overview-index.html
 
 # String to search for the right version. Changing the default is in most
 # cases not necessary.

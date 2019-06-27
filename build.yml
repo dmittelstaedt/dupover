@@ -1,0 +1,52 @@
+---
+- hosts: localhost
+  vars:
+    proxy: proxy
+    s390x: false
+  tasks:
+    - name: Build image for x86
+      docker_image:
+        name: dataport.de/dupover
+        tag: latest
+        build:
+          path: .
+          args:
+            http_proxy: "{{ proxy }}"
+            https_proxy: "{{ proxy }}"
+          pull: yes
+          nocache: yes
+        source: build
+        force_source: yes
+      when: not s390x|bool
+    - name: Build image for s390x
+      docker_image:
+        name: dataport.de/dupover
+        tag: latest
+        build:
+          path: .
+          dockerfile: Dockerfile.s390x
+          args:
+            http_proxy: "{{ proxy }}"
+            https_proxy: "{{ proxy }}"
+          pull: yes
+          nocache: yes
+        source: build
+        force_source: yes
+      when: s390x|bool
+    - name: Create container
+      docker_container:
+          name: dupover
+          image: dataport.de/dupover
+          recreate: yes
+          state: present
+    - name: Copy executable from container
+      shell: docker cp dupover:/go/src/app/dupover .
+    - name: Remove container
+      docker_container:
+        name: dupover
+        state: absent
+    - name: Remove image
+      docker_image:
+        name: dataport.de/dupover
+        tag: latest
+        state: absent
