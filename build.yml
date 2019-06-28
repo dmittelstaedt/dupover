@@ -24,10 +24,10 @@
         tag: latest
         build:
           path: .
-          dockerfile: Dockerfile.s390x
           args:
             http_proxy: "{{ proxy }}"
             https_proxy: "{{ proxy }}"
+            arch: s390x
           pull: yes
           nocache: yes
         source: build
@@ -39,8 +39,24 @@
           image: dataport.de/dupover
           recreate: yes
           state: present
-    - name: Copy executable from container
-      shell: docker cp dupover:/go/src/app/dupover .
+    - name: Create package directory
+      file:
+        path: dupover-0.0.1
+        state: directory
+        mode: 0750
+    - name: Copy config file
+      copy:
+        src: config.yml
+        dest: dupover-0.0.1/config.yml
+        mode: 0660
+        remote_src: yes
+    - name: Copy binary from container
+      shell: docker cp dupover:/go/src/app/dupover dupover-0.0.1
+    - name: Create package
+      archive:
+        path: dupover-0.0.1
+        dest: dupover-0.0.1.zip
+        format: zip
     - name: Remove container
       docker_container:
         name: dupover
